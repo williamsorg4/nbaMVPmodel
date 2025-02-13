@@ -1,0 +1,84 @@
+---
+title: "NBA Most Valuable Player Model"
+author: "William Sorg.74"
+date: "2025-02-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Selection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Exploratory Analysis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Model Building
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Model Evaluation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Analysis and Findings
