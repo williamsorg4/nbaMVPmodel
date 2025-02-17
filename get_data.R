@@ -37,9 +37,6 @@ mvp_data <- mvp_data %>%
   mutate_at(c("Share", "MP", "PTS", "TRB", "AST", "STL", "BLK", "FG%", "3P%",
               "FT%", "WS", "WS/48"), as.double)
 
-# Create winning column
-mvp_data <- mvp_data %>% 
-  mutate(won = Rank == 1)
 
 # Get per game stats ------------------------------------------------------
 per_game <- tibble()
@@ -158,23 +155,44 @@ mvp_data <- mvp_data %>%
 mvp_data <- mvp_data %>% 
   mutate(`G%` = G/max(G), .by = year, .before = href)
 
-
 test <- mvp_data %>% 
-  select(Player, year, `WS/48`)
+  group_by(href) %>% 
+  arrange(year, ,.by_group = TRUE) %>% 
+  mutate(won_before = lag(won) + won) %>% 
+  mutate(won_before = case_when(won_before == 0 ~ "Never",
+                                won_before == 1 ~ "Once",
+                                won_before <= 2 ~ "Multiple")) %>% 
+  filter(Player == "LeBron James")
+
+
+# Save Data ----------------------------------------------------------
+
+saveRDS(mvp_data, "mvp_data.rds")
 
 mvp_data %>% 
-  ggplot(aes(x = year, y = `G%`)) +
+  select(year, Rank, Player, Age, Team, Pos, Share, `G%`, G, MP, FGA, `FG%`, `eFG%`, 
+         `FT%`, ORB, TRB, AST, STL, BLK, TOV, PTS, PER, `TS%`, FTr, Awards, href)
+
+
+
+
+
+
+
+mvp_data %>% 
+  ggplot(aes(x = OWS, y = DWS, alpha = .25)) +
   geom_point()
 
-
 mvp_data %>% 
-  ggplot(aes(x = `G%`, y = as.integer(won))) +
+  filter(is.na(PER))
+mvp_data %>% 
+  ggplot(aes(x = DWS, y = as.integer(won))) +
   geom_point() +
   geom_smooth(method = 'glm', method.args = list(family = 'binomial'))
 
 mvp_data %>% 
   filter(won) %>% 
-  ggplot(aes(x = year, y = PTS)) +
+  ggplot(aes(x = WS, y = VORP)) +
   geom_point()
 
 mvp_data %>% 
@@ -182,9 +200,11 @@ mvp_data %>%
   arrange(desc(PTS))
 
 
-m1 <- glm(won ~ WS + `G%` + PTS, data = mvp_data, family = 'binomial')
+m1 <- glm(won ~ OWS + DWS, data = mvp_data, family = 'binomial')
 m2 <- lm(Share ~ WS + `G%` + PTS, data = mvp_data)
-summary(m2)
+
+summary(m1)
+DescTools::VIF(m1)
 predict(m2, 
         tibble(WS = 15,
                `G%` = 1,
